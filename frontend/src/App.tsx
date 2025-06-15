@@ -1,5 +1,5 @@
 import './App.css'
-import FishTamagotchiUI from './FishTamagotchiUI'
+import FishTamagotchiUI from './components/FishTamagotchiUI'
 
 function App() {
   return (

@@ -9,23 +9,30 @@ pub struct InstantiateMsg {}
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     AdoptFish { name: String },
-    FeedFish {},
+    FeedFish { fish_id: u64 },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
-    FishStatus { address: Addr },
+    FishStatus { address: Addr, fish_id: u64 },
+    AllFish {}
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct FishStatus {
+    pub id: Uint64,
+    pub name: String,
+    pub age: Uint64,
+    pub seconds_since_fed: Uint64,
+    pub dead: bool,
+    pub colour: u16
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryAnswer {
-    FishStatus {
-        name: String,
-        age: Uint64,
-        seconds_since_fed: Uint64,
-        dead: bool,
-    },
+    FishStatus(FishStatus),
+    AllFishStatus(Vec<FishStatus>)
 }
 

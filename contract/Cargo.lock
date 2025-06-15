@@ -27,9 +27,9 @@ checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
 
 [[package]]
 name = "base64ct"
-version = "1.7.3"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89e25b6adfb930f02d1981565a6e5d9c547ac15a96606256d3b59040e5cd4ca3"
+checksum = "55248b47b0caf0546f7988906588779981c43bb1bc9d0c44087278f80cdb44ba"
 
 [[package]]
 name = "bech32"
@@ -593,10 +593,10 @@ source = "git+https://github.com/scrtlabs/secret-toolkit?tag=v0.10.3#cc089ba27cc
 dependencies = [
  "secret-toolkit-crypto",
  "secret-toolkit-permit",
- "secret-toolkit-serialization",
+ "secret-toolkit-serialization 0.10.2",
  "secret-toolkit-snip20",
  "secret-toolkit-snip721",
- "secret-toolkit-storage",
+ "secret-toolkit-storage 0.10.2",
  "secret-toolkit-utils",
 ]
 
@@ -625,6 +625,18 @@ dependencies = [
  "schemars",
  "secret-cosmwasm-std",
  "secret-toolkit-crypto",
+ "serde",
+]
+
+[[package]]
+name = "secret-toolkit-serialization"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b416b839ab77988d9c74e89cfa9d337ad641a52695f26cde460d6675f3c85f94"
+dependencies = [
+ "bincode2",
+ "schemars",
+ "secret-cosmwasm-std",
  "serde",
 ]
 
@@ -663,12 +675,24 @@ dependencies = [
 
 [[package]]
 name = "secret-toolkit-storage"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f65cc5f8db89dee874f9e5e5a697a10e88221882d877e54d3037d6d3e4c4ef4f"
+dependencies = [
+ "secret-cosmwasm-std",
+ "secret-cosmwasm-storage",
+ "secret-toolkit-serialization 0.9.0",
+ "serde",
+]
+
+[[package]]
+name = "secret-toolkit-storage"
 version = "0.10.2"
 source = "git+https://github.com/scrtlabs/secret-toolkit?tag=v0.10.3#cc089ba27cc414aab89838626169bcc495623d4c"
 dependencies = [
  "secret-cosmwasm-std",
  "secret-cosmwasm-storage",
- "secret-toolkit-serialization",
+ "secret-toolkit-serialization 0.10.2",
  "serde",
 ]
 
@@ -692,6 +716,7 @@ dependencies = [
  "secret-cosmwasm-std",
  "secret-cosmwasm-storage",
  "secret-toolkit",
+ "secret-toolkit-storage 0.9.0",
  "serde",
  "thiserror",
 ]
