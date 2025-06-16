@@ -6,11 +6,13 @@ import type { FishStatus } from '../secretjs/SecretJsFunctions'
 
 const Container = styled.div`
   position: fixed;
+  z-index: -1;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   pointer-events: none;
+  background: linear-gradient(#2191FB, #2151aB);
 `
 
 type FishTankProps = {
@@ -27,20 +29,22 @@ const FishTank = ({ allFish }: FishTankProps) => {
   }
 
   useEffect(() => {
+    updateTick()
+
+    if (allFish.length == 0) return;
+
     // Get a random fish that isn't on screen
-    
-    let fish = allFish.filter(
+    let fishNotInTank = allFish.filter(
       (fish) => !fishInTank.has(fish)
-    )[Math.floor(Math.random() * allFish.length)]
-    console.log(fish)
+    )
+    let fish = fishNotInTank[Math.floor(Math.random() * fishNotInTank.length)]
+    console.log('spawned fish', fish)
 
     if (fish) {
       // Show it
       showFish(fish)
       setFishInTank(new Set([...fishInTank, fish]))
     }
-
-    updateTick()
   }, [tick])
 
   return <Container>{fishElements}</Container>

@@ -15,12 +15,12 @@ pub enum ExecuteMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
-    FishStatus { address: Addr, fish_id: u64 },
+    FishStatus { address: Addr },
     AllFish {}
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct FishStatus {
+pub struct FullFishStatus {
     pub id: Uint64,
     pub name: String,
     pub age: Uint64,
@@ -30,9 +30,17 @@ pub struct FishStatus {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct ShortFishStatus {
+    pub id: Uint64,
+    pub name: String,
+    pub dead: bool,
+    pub colour: u16
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryAnswer {
-    FishStatus(FishStatus),
-    AllFishStatus(Vec<FishStatus>)
+    MyFishStatus(Vec<FullFishStatus>),
+    AllFishStatus(Vec<ShortFishStatus>)
 }
 

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState } from 'react'
 import type { Dispatch, ReactElement, ReactNode, SetStateAction } from 'react'
 import Fish from '../components/Fish'
 import type { FishStatus } from '../secretjs/SecretJsFunctions'
-import { Timestamp } from 'secretjs/dist/protobuf/google/protobuf/timestamp'
 
 export type FishContextProps = {
   fishElements: ReactElement[],
@@ -23,18 +22,11 @@ export const FishContextProvider = ({ children }: FishProviderProps) => {
   const [fishElements, setFishElements] = useState<ReactElement[]>([])
   const [ fishInTank, setFishInTank ] = useState(new Set<FishStatus>())
 
-  const removeFish = (fishToRemove: FishStatus) => {
-    setFishInTank(new Set(
-      Array.from(fishInTank).filter((fish) => fish != fishToRemove)
-    ))
-    setFishElements(fishElements.filter((fish) => fish != null))
-  }
-
   const showFish = (fish: FishStatus) => {
-    const reverse = Math.random() * 10 > 5
+    const reverse = Math.random() > 0.5
     const startY = Math.floor(Math.random() * 90) + 5
-    const duration = Math.floor(Math.random() * 15 + 30)
-    const distance = Math.floor(Math.random() * 100 + 13)
+    const speed = Math.floor(Math.random() * 15 + 30)
+    const size = Math.floor(Math.random() * 100 + 13)
 
     setFishInTank(new Set([...fishInTank, fish]))
 
@@ -42,12 +34,11 @@ export const FishContextProvider = ({ children }: FishProviderProps) => {
       ...fishElements,
       <Fish
         key={`fish-${fish.id}-${new Date().getMilliseconds()}`}
-        $duration={duration}
+        $speed={speed}
         $reverse={reverse}
         startY={startY}
-        distance={distance}
+        size={size}
         fishStatus={fish}
-        removeFish={removeFish}
       />
     ])
   }

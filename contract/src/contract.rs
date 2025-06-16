@@ -3,7 +3,7 @@ use cosmwasm_std::{
     StdError, StdResult,
 };
 
-use crate::msg::{ExecuteMsg, FishStatus, InstantiateMsg, QueryAnswer, QueryMsg};
+use crate::msg::{ExecuteMsg, ShortFishStatus, FullFishStatus, InstantiateMsg, QueryAnswer, QueryMsg};
 use crate::state::{Fish, FISHES, FISH_COUNTER, MAX_HUNGER_DURATION, OWNER_TO_FISH};
 
 #[entry_point]
@@ -84,64 +84,59 @@ fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> St
 #[entry_point]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::FishStatus { address, fish_id } => {
+        QueryMsg::FishStatus { address } => {
             let sender_canonical = deps.api.addr_canonicalize(address.as_str())?;
-            return fish_status(deps, env, sender_canonical, fish_id);
+            return fish_status(deps, env, sender_canonical);
         }
         QueryMsg::AllFish {} => return all_fish(deps, env),
     }
 }
 
-fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr, fish_id: u64) -> StdResult<Binary> {
-    let fish = match FISHES.get(deps.storage, &fish_id) {
-        Some(f) => f,
-        None => return Err(StdError::generic_err("This fish doesn't exist!")),
-    };
-
-    if fish.owner != sender {
-        return Err(StdError::generic_err("This is not your fish!"));
-    }
+fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary> {
+    let fish_ids = OWNER_TO_FISH
+        .get(deps.storage, &sender)
+        .ok_or_else(|| StdError::generic_err("You don't have any fish!"))?;
 
     let now = env.block.time.seconds();
-    let time_since_fed = now - fish.last_fed.seconds();
-    let age = now - fish.created_at.seconds();
 
-    Ok(to_binary(&QueryAnswer::FishStatus(FishStatus {
-        id: fish_id.into(),
-        name: fish.name,
-        age: age.into(),
-        seconds_since_fed: time_since_fed.into(),
-        dead: fish.dead,
-        colour: fish.colour,
-    }))?)
+    let mut statuses = Vec::new();
+
+    for fish_id in fish_ids {
+        let fish = FISHES
+            .get(deps.storage, &fish_id).unwrap();
+
+        let age = now - fish.created_at.seconds();
+        let time_since_fed = now - fish.last_fed.seconds();
+
+        statuses.push(FullFishStatus {
+            id: fish_id.into(),
+            name: fish.name,
+            age: age.into(),
+            seconds_since_fed: time_since_fed.into(),
+            dead: fish.dead,
+            colour: fish.colour,
+        });
+    }
+
+    Ok(to_binary(&QueryAnswer::MyFishStatus(statuses))?)
 }
 
 fn all_fish(deps: Deps, env: Env) -> StdResult<Binary> {
-    let now = env.block.time.seconds();
-
-    let fishes: Vec<FishStatus> = FISHES
+    let fishes: Vec<ShortFishStatus> = FISHES
         .iter(deps.storage)?
         .map(|item| {
             let (id, fish) = item?;
-            let age = now - fish.created_at.seconds();
-            let time_since_fed = now - fish.last_fed.seconds();
-
-            Ok(FishStatus {
+            Ok(ShortFishStatus {
                 id: id.into(),
                 name: fish.name,
-                age: age.into(),
-                seconds_since_fed: time_since_fed.into(),
                 dead: fish.dead,
                 colour: fish.colour,
             })
         })
         .collect::<StdResult<Vec<_>>>()?;
 
-    Ok(to_binary(&QueryAnswer::AllFishStatus(
-        fishes
-    ))?)
+    Ok(to_binary(&QueryAnswer::AllFishStatus(fishes))?)
 }
-
 
 fn random_colour(env: &Env) -> StdResult<u16> {
     let randomness = env

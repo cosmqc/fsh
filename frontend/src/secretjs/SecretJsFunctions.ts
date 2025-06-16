@@ -64,7 +64,7 @@ const SecretJsFunctions = () => {
         return tx
     };
 
-    const query_fish_status = async (): Promise<FishStatus> => {
+    const query_my_fish = async (): Promise<FishStatus> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
 
         const queryMsg = {
@@ -109,7 +109,7 @@ const SecretJsFunctions = () => {
     return {
         adopt_fish,
         feed_fish,
-        query_fish_status,
+        query_my_fish,
         query_all_fish
     };
 };

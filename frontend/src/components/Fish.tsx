@@ -1,6 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import styled from 'styled-components'
-import { sleep } from '../utils/sleep'
 import type { FishStatus } from '../secretjs/SecretJsFunctions'
 
 type FishContainerProps = {
@@ -19,20 +17,22 @@ const FishContainer = styled.div.attrs<FishContainerProps>(
 `
 
 type PixelFishProps = {
-  $duration: number,
+  $speed: number,
   $reverse: boolean,
-  $distance: number,
+  $size: number,
   $colour: number
 }
 
 const PixelFish = styled.img.attrs<PixelFishProps>(
-  ({ $duration, $reverse, $distance, $colour }: PixelFishProps) => ({
+  ({ $speed, $reverse, $size, $colour }: PixelFishProps) => ({
     style: {
       left: `${$reverse ? '-60px' : '100vw'}`,
-      animation: `${$reverse ? 'ltr' : 'rtl'} ${$duration}s forwards`,
-      width: `${$distance}px`,
+      animation: `${$reverse ? 'ltr' : 'rtl'} ${$speed}s forwards`,
+      width: `${$size}px`,
       height: 'auto',
-      filter: `hue-rotate(${$colour}deg)`
+      filter: `hue-rotate(${$colour}deg)`,
+      opacity: `${$size}%`,
+      zIndex: -1
     }
   })
 )`
@@ -43,7 +43,7 @@ const PixelFish = styled.img.attrs<PixelFishProps>(
       transform: translateX(0) scaleX(-1);
     }
     100% {
-      transform: translateX(130vw) scaleX(-1);
+      transform: translateX(110vw) scaleX(-1);
     }
   }
 
@@ -52,7 +52,7 @@ const PixelFish = styled.img.attrs<PixelFishProps>(
       transform: translateX(0);
     }
     100% {
-      transform: translateX(-130vw);
+      transform: translateX(-110vw);
     }
   }
 `
@@ -62,29 +62,14 @@ const handleHover = (fishId: number) => {
 }
 
 export type FishProps = {
-  $duration: number
+  $speed: number
   $reverse: boolean
   startY: number
-  distance: number
+  size: number
   fishStatus: FishStatus,
-  removeFish: (fish: FishStatus) => void
 }
 
-const Fish: React.FC<FishProps> = ({ $duration, $reverse, startY, distance, fishStatus, removeFish }) => {
-  const [isDead, setIsDead] = useState(false)
-
-  const removeSelf = async () => {
-    await sleep($duration)
-    setIsDead(true)
-    removeFish(fishStatus)
-  }
-
-  useEffect(() => {
-    removeSelf()
-  }, [])
-
-  if (isDead) return null
-
+const Fish: React.FC<FishProps> = ({ $speed, $reverse, startY, size, fishStatus }) => {
   return (
     <FishContainer
       //@ts-ignore
@@ -94,11 +79,11 @@ const Fish: React.FC<FishProps> = ({ $duration, $reverse, startY, distance, fish
       <PixelFish
         src='/fish.png'
         // @ts-ignore
-        $duration={$duration}
+        $speed={$speed}
         // @ts-ignore
         $reverse={$reverse}
         // @ts-ignore
-        $distance={distance}
+        $size={size}
         $colour={fishStatus.colour}
       />
     </FishContainer>
