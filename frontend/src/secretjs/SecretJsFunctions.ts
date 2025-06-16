@@ -6,7 +6,7 @@ import type { TxResponse } from "secretjs";
 const contractCodeHash = import.meta.env.VITE_CONTRACT_CODE_HASH;
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDR;
 
-type FishStatus = {
+type FullFishStatus = {
     id: number;
     name: string;
     age: number;
@@ -15,7 +15,14 @@ type FishStatus = {
     colour: number;
 };
 
-type FishStatusResponse = FishStatus | string;
+type ShortFishStatus = {
+    id: number,
+    name: string,
+    dead: boolean;
+    colour: number;
+}
+
+type FishStatusResponse = FullFishStatus | string;
 
 const SecretJsFunctions = () => {
     const context = useContext(SecretJsContext);
@@ -45,8 +52,12 @@ const SecretJsFunctions = () => {
         return tx
     };
 
-    const feed_fish = async (fishIdString: string): Promise<TxResponse> => {
+    const feed_fish = async (fish_id: number): Promise<TxResponse> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
+        
+        // For some reason, if I don't do this, the contract converts it to a string and
+        // complains its the wrong type. Man on bicycle with stick vibes
+        let fish_id_number = parseInt(fish_id.toString())
 
         const msg = {
             sender: secretAddress,
@@ -54,7 +65,7 @@ const SecretJsFunctions = () => {
             code_hash: contractCodeHash,
             msg: {
                 feed_fish: {
-                    fish_id: parseInt(fishIdString)
+                    fish_id: fish_id_number
                 }
             }
         };
@@ -64,7 +75,7 @@ const SecretJsFunctions = () => {
         return tx
     };
 
-    const query_my_fish = async (): Promise<FishStatus> => {
+    const query_my_fish = async (): Promise<FullFishStatus> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
 
         const queryMsg = {
@@ -86,7 +97,7 @@ const SecretJsFunctions = () => {
         return result;
     };
 
-    const query_all_fish = async (): Promise<FishStatus> => {
+    const query_all_fish = async (): Promise<ShortFishStatus> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
 
         const queryMsg = {
@@ -103,6 +114,8 @@ const SecretJsFunctions = () => {
             throw new QueryError(result);
         }
 
+
+
         return result;
     };
 
@@ -115,4 +128,4 @@ const SecretJsFunctions = () => {
 };
 
 export { SecretJsFunctions };
-export type { FishStatus, FishStatusResponse }
+export type { ShortFishStatus, FullFishStatus, FishStatusResponse }

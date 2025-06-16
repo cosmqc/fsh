@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import useFish from '../contexts/fishes'
 import { sleep } from '../utils/sleep'
-import type { FishStatus } from '../secretjs/SecretJsFunctions'
+import type { ShortFishStatus } from '../secretjs/SecretJsFunctions'
 
 const Container = styled.div`
   position: fixed;
@@ -16,7 +16,7 @@ const Container = styled.div`
 `
 
 type FishTankProps = {
-  allFish: FishStatus[];
+  allFish: ShortFishStatus[];
 };
 
 const FishTank = ({ allFish }: FishTankProps) => {
@@ -38,7 +38,6 @@ const FishTank = ({ allFish }: FishTankProps) => {
       (fish) => !fishInTank.has(fish)
     )
     let fish = fishNotInTank[Math.floor(Math.random() * fishNotInTank.length)]
-    console.log('spawned fish', fish)
 
     if (fish) {
       // Show it

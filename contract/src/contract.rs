@@ -95,7 +95,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
 fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary> {
     let fish_ids = OWNER_TO_FISH
         .get(deps.storage, &sender)
-        .ok_or_else(|| StdError::generic_err("You don't have any fish!"))?;
+        .unwrap_or_default();
 
     let now = env.block.time.seconds();
 
@@ -121,7 +121,7 @@ fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary>
     Ok(to_binary(&QueryAnswer::MyFishStatus(statuses))?)
 }
 
-fn all_fish(deps: Deps, env: Env) -> StdResult<Binary> {
+fn all_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
     let fishes: Vec<ShortFishStatus> = FISHES
         .iter(deps.storage)?
         .map(|item| {

@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState } from 'react'
 import type { Dispatch, ReactElement, ReactNode, SetStateAction } from 'react'
 import Fish from '../components/Fish'
-import type { FishStatus } from '../secretjs/SecretJsFunctions'
+import type { ShortFishStatus } from '../secretjs/SecretJsFunctions'
 
 export type FishContextProps = {
   fishElements: ReactElement[],
-  showFish: (fish: FishStatus, ) => void,
-  fishInTank: Set<FishStatus>,
-  setFishInTank: Dispatch<SetStateAction<Set<FishStatus>>>
+  showFish: (fish: ShortFishStatus, ) => void,
+  fishInTank: Set<ShortFishStatus>,
+  setFishInTank: Dispatch<SetStateAction<Set<ShortFishStatus>>>
 }
 
 export type FishProviderProps = {
@@ -20,9 +20,9 @@ export const FishContext: React.Context<FishContextProps> = createContext<
 
 export const FishContextProvider = ({ children }: FishProviderProps) => {
   const [fishElements, setFishElements] = useState<ReactElement[]>([])
-  const [ fishInTank, setFishInTank ] = useState(new Set<FishStatus>())
+  const [ fishInTank, setFishInTank ] = useState(new Set<ShortFishStatus>())
 
-  const showFish = (fish: FishStatus) => {
+  const showFish = (fish: ShortFishStatus) => {
     const reverse = Math.random() > 0.5
     const startY = Math.floor(Math.random() * 90) + 5
     const speed = Math.floor(Math.random() * 15 + 30)
@@ -33,7 +33,7 @@ export const FishContextProvider = ({ children }: FishProviderProps) => {
     setFishElements([
       ...fishElements,
       <Fish
-        key={`fish-${fish.id}-${new Date().getMilliseconds()}`}
+        key={`fish-${fish.id}-${size}`}
         $speed={speed}
         $reverse={reverse}
         startY={startY}

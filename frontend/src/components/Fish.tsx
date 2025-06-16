@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import type { FishStatus } from '../secretjs/SecretJsFunctions'
+import type { ShortFishStatus } from '../secretjs/SecretJsFunctions'
 
 type FishContainerProps = {
   $startPosition: number
@@ -57,16 +57,12 @@ const PixelFish = styled.img.attrs<PixelFishProps>(
   }
 `
 
-const handleHover = (fishId: number) => {
-    console.log(fishId);
-}
-
 export type FishProps = {
   $speed: number
   $reverse: boolean
   startY: number
   size: number
-  fishStatus: FishStatus,
+  fishStatus: ShortFishStatus,
 }
 
 const Fish: React.FC<FishProps> = ({ $speed, $reverse, startY, size, fishStatus }) => {
@@ -74,7 +70,6 @@ const Fish: React.FC<FishProps> = ({ $speed, $reverse, startY, size, fishStatus 
     <FishContainer
       //@ts-ignore
       $startPosition={startY}
-      onMouseEnter={() => handleHover(fishStatus.id)}
     >
       <PixelFish
         src='/fish.png'
