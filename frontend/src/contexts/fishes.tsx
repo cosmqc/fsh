@@ -5,7 +5,7 @@ import type { ShortFishStatus } from '../secretjs/SecretJsFunctions'
 
 export type FishContextProps = {
   fishElements: ReactElement[],
-  showFish: (fish: ShortFishStatus, ) => void,
+  showFish: (fish: ShortFishStatus) => void,
   fishInTank: Set<ShortFishStatus>,
   setFishInTank: Dispatch<SetStateAction<Set<ShortFishStatus>>>
 }
@@ -24,21 +24,26 @@ export const FishContextProvider = ({ children }: FishProviderProps) => {
 
   const showFish = (fish: ShortFishStatus) => {
     const reverse = Math.random() > 0.5
-    const startY = Math.floor(Math.random() * 90) + 5
+    const startY = Math.floor(Math.random() * 70) + 15
     const speed = Math.floor(Math.random() * 15 + 30)
     const size = Math.floor(Math.random() * 100 + 13)
-
-    setFishInTank(new Set([...fishInTank, fish]))
 
     setFishElements([
       ...fishElements,
       <Fish
-        key={`fish-${fish.id}-${size}`}
+        key={`fish-${fish.id}`}
         $speed={speed}
         $reverse={reverse}
         startY={startY}
         size={size}
         fishStatus={fish}
+        onRemove={() => {
+          console.log('on remove')
+          setFishElements(fishElements.filter((ele) => ele.key != `fish-${fish.id}`))
+          const updatedFishInTank = new Set(fishInTank)
+          updatedFishInTank.delete(fish)
+          setFishInTank(updatedFishInTank)
+        }}
       />
     ])
   }
