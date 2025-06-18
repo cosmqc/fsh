@@ -23,17 +23,16 @@ const Container = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  pointer-events: none;
   background: linear-gradient(
     to bottom,
-    #87CEEB 0%,     /* Sky blue at top */
-    #4682B4 15%,    /* Steel blue */
-    #2191FB 25%,    /* Your original blue */
-    #1E90FF 40%,    /* Dodger blue */
-    #0066CC 55%,    /* Ocean blue */
-    #2151aB 70%,    /* Your original darker blue */
-    #004080 80%,    /* Deep blue */
-    #003366 90%,    /* Darker blue */
+    #87CEEB 0%,    /* Gradient of blues */
+    #4682B4 15%,
+    #2191FB 25%,
+    #1E90FF 40%,
+    #0066CC 55%,
+    #2151aB 70%,
+    #004080 80%,
+    #003366 90%,
     #D4B896 95%,    /* Sandy beige */
     #C4A77D 100%    /* Darker sand */
   );
@@ -92,30 +91,30 @@ type FishTankProps = {
 const FishTank = ({ allFish }: FishTankProps) => {
   const { fishElements, showFish, fishInTank, setFishInTank } = useFish()
   const [tick, setTick] = useState(0)
-  
+
   const updateTick = async () => {
-    await sleep(2)
+    await sleep(Math.random() * 2 + 1)
     setTick((tick + 1) % 3)
   }
-  
-useEffect(() => {
+
+  useEffect(() => {
     updateTick()
 
     if (allFish.length == 0) return;
 
-    // Get a random fish that isn't on screen
-    let fishNotInTank = allFish.filter(
-      (fish) => !fishInTank.has(fish)
+    // Get all the fish not on screen
+    const fishNotInTank = allFish.filter(
+      (fish) => !fishInTank.has(fish.id)
     )
-    let fish = fishNotInTank[Math.floor(Math.random() * fishNotInTank.length)]
 
+    // Pick a random one and spawn it
+    const fish = fishNotInTank[Math.floor(Math.random() * fishNotInTank.length)]
     if (fish) {
-      // Show it
       showFish(fish)
-      setFishInTank(new Set([...fishInTank, fish]))
+      setFishInTank((currFishInTank) => new Set([...currFishInTank, fish.id]))
     }
   }, [tick])
-  
+
   return (
     <Container>
       <SandTexture />

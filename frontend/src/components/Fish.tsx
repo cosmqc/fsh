@@ -59,67 +59,59 @@ const Fish: React.FC<FishProps> = ({
   // Calculate initial position based on direction
   const getInitialX = () => {
     if ($reverse) {
-      return -60 // Start from left side
+      return -100 // Start from left side
     } else {
-      return window.innerWidth + 60 // Start from right side
+      return window.innerWidth + 100 // Start from right side
     }
   }
 
   const [x, setX] = useState(getInitialX)
+  const [isVisible, setIsVisible] = useState(!document.hidden)
 
   useEffect(() => {
-    // Calculate movement per tick based on speed
-    // Higher speed = faster movement
-    const pixelsPerTick = $speed * 0.5 // Adjust multiplier as needed
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden)
+    }
     
-    const interval = setInterval(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  useEffect(() => {
+    const pixelsPerTick = $speed * 0.25
+    
+    setInterval(() => {
+      if (!isVisible) return;
+
       setX(prevX => {
-        let newX
-        
-        if ($reverse) {
-          // Moving left to right
-          newX = prevX + pixelsPerTick
-          
-          // Check if fish has moved off the right side
-          if (newX > window.innerWidth + 200) {
-            onRemove?.()
-            return prevX // Don't update if we're removing
-          }
-        } else {
-          // Moving right to left
-          newX = prevX - pixelsPerTick
-          
-          // Check if fish has moved off the left side
-          if (newX < -200) {
-            onRemove?.()
-            return prevX // Don't update if we're removing
-          }
-        }
-        
+        const newX = $reverse ? prevX + pixelsPerTick : prevX - pixelsPerTick
         return newX
       })
-    }, 100) // Tick every 100ms - adjust for smoother/choppier movement
+    }, 100)
 
-    return () => clearInterval(interval)
-  }, [$speed, $reverse, onRemove])
+  }, [$speed, $reverse])
 
-  // Reset position if window is resized
   useEffect(() => {
     const handleResize = () => {
       if (!$reverse && x > window.innerWidth) {
-        setX(window.innerWidth + 60)
+        setX(window.innerWidth + 200)
       }
     }
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [x, $reverse])
+  }, [])
+
+  useEffect(() => {
+    if (x < -200 || x > window.innerWidth + 200) {
+      onRemove?.();
+    }
+  }, [x]);
 
   return (
     <FishContainer
       //@ts-ignore
       $startPosition={startY}
-      style={{ pointerEvents: 'auto' }}
     >
       <PixelFish
         src='/fish.png'

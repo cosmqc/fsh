@@ -69,7 +69,7 @@ const FishTamagotchiUI = () => {
     }, []);
 
     return (
-        <div style={{ fontFamily: "sans-serif", display: "flex", width: "100vw", minHeight: "100vh", pointerEvents: "none" }}>
+        <div style={{ fontFamily: "sans-serif", display: "flex", width: "100vw", minHeight: "100vh" }}>
             {/* Ocean-Themed Side Menu */}
             <div
                 style={{
@@ -288,7 +288,7 @@ const FishTamagotchiUI = () => {
             </div>
 
             {/* Main Content */}
-            <div style={{ flex: 1, padding: "1rem", pointerEvents: "none" }}>
+            <div style={{ flex: 1, padding: "1rem" }}>
                 <FishContextProvider>
                     <FishTank allFish={allFish} />
                 </FishContextProvider>

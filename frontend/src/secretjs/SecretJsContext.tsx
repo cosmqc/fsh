@@ -9,6 +9,7 @@ import type {
     FC,
 } from "react";
 import { SecretNetworkClient } from "secretjs";
+import { sleep } from "../utils/sleep"
 
 // can make these .env vars instead
 const SECRET_CHAIN_ID = import.meta.env.VITE_SECRET_CHAIN_ID;
@@ -47,8 +48,6 @@ const SecretJsContextProvider: FC<SecretJsContextProviderProps> = ({ children })
         setSecretJs: Dispatch<SetStateAction<SecretNetworkClient | null>>,
         setSecretAddress: Dispatch<SetStateAction<string>>
     ): Promise<void> {
-        const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
         while (
             !window.keplr ||
             !window.getEnigmaUtils ||

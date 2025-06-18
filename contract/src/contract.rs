@@ -54,6 +54,7 @@ fn adopt_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, name: String) -> S
     Ok(Response::new().add_attribute("action", "adopt_fish"))
 }
 
+
 fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> StdResult<Response> {
     let mut fish = match FISHES.get(deps.storage, &fish_id) {
         Some(f) => f,
@@ -81,6 +82,7 @@ fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> St
     Ok(Response::new().add_attribute("action", "feed_fish"))
 }
 
+
 #[entry_point]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
@@ -91,6 +93,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::AllFish {} => return all_fish(deps, env),
     }
 }
+
 
 fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary> {
     let fish_ids = OWNER_TO_FISH
@@ -121,6 +124,7 @@ fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary>
     Ok(to_binary(&QueryAnswer::MyFishStatus(statuses))?)
 }
 
+
 fn all_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
     let fishes: Vec<ShortFishStatus> = FISHES
         .iter(deps.storage)?
@@ -138,6 +142,7 @@ fn all_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
     Ok(to_binary(&QueryAnswer::AllFishStatus(fishes))?)
 }
 
+
 fn random_colour(env: &Env) -> StdResult<u16> {
     let randomness = env
         .block
@@ -151,8 +156,8 @@ fn random_colour(env: &Env) -> StdResult<u16> {
         return Err(StdError::generic_err("Insufficient randomness bytes"));
     }
 
-    let raw = u16::from_be_bytes([bytes[0], bytes[1]]);
-    let result = raw % 360;
+    let raw: u32 = u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
+    let result = (raw % 360) as u16;
 
     Ok(result)
 }

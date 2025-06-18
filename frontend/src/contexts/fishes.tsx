@@ -6,8 +6,8 @@ import type { ShortFishStatus } from '../secretjs/SecretJsFunctions'
 export type FishContextProps = {
   fishElements: ReactElement[],
   showFish: (fish: ShortFishStatus) => void,
-  fishInTank: Set<ShortFishStatus>,
-  setFishInTank: Dispatch<SetStateAction<Set<ShortFishStatus>>>
+  fishInTank: Set<number>,
+  setFishInTank: Dispatch<SetStateAction<Set<number>>>
 }
 
 export type FishProviderProps = {
@@ -20,7 +20,16 @@ export const FishContext: React.Context<FishContextProps> = createContext<
 
 export const FishContextProvider = ({ children }: FishProviderProps) => {
   const [fishElements, setFishElements] = useState<ReactElement[]>([])
-  const [ fishInTank, setFishInTank ] = useState(new Set<ShortFishStatus>())
+  const [fishInTank, setFishInTank] = useState<Set<number>>(new Set())
+
+  const handleRemove = (fishId: number) => {
+    setFishElements(current => current.filter(ele => ele.key !== `fish-${fishId}`))
+    setFishInTank(current => {
+      const newSet = new Set(current)
+      newSet.delete(fishId)
+      return newSet
+    })
+  }
 
   const showFish = (fish: ShortFishStatus) => {
     const reverse = Math.random() > 0.5
@@ -28,8 +37,8 @@ export const FishContextProvider = ({ children }: FishProviderProps) => {
     const speed = Math.floor(Math.random() * 15 + 30)
     const size = Math.floor(Math.random() * 100 + 13)
 
-    setFishElements([
-      ...fishElements,
+    setFishElements(currentElements => [
+      ...currentElements,
       <Fish
         key={`fish-${fish.id}`}
         $speed={speed}
@@ -37,13 +46,7 @@ export const FishContextProvider = ({ children }: FishProviderProps) => {
         startY={startY}
         size={size}
         fishStatus={fish}
-        onRemove={() => {
-          console.log('on remove')
-          setFishElements(fishElements.filter((ele) => ele.key != `fish-${fish.id}`))
-          const updatedFishInTank = new Set(fishInTank)
-          updatedFishInTank.delete(fish)
-          setFishInTank(updatedFishInTank)
-        }}
+        onRemove={() => handleRemove(fish.id)}
       />
     ])
   }
