@@ -4,7 +4,6 @@ import * as fs from "fs";
 
 dotenv.config();  // Load environment variables from .env file 
 const mnemonic = process.env.MNEMONIC;  // Retrieve the mnemonic
-console.log(mnemonic);
 const wallet = new Wallet(mnemonic);
 
 // create a new client for the Pulsar testnet
@@ -17,7 +16,6 @@ const secretjs = new SecretNetworkClient({
 
 
 const uploadContract = async (contract_wasm: Buffer): Promise<{code_id: string, code_hash?: string}> => {
-    console.log(contract_wasm);
     let tx = await secretjs.tx.compute.storeCode(
         {
             sender: wallet.address,

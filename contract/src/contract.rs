@@ -3,7 +3,7 @@ use cosmwasm_std::{
     StdError, StdResult,
 };
 
-use crate::msg::{ExecuteMsg, ShortFishStatus, FullFishStatus, InstantiateMsg, QueryAnswer, QueryMsg};
+use crate::msg::{ExecuteMsg, ShortFishStatus, FullFishStatus, InstantiateMsg, QueryAnswer, QueryMsg, DeadFishStatus};
 use crate::state::{Fish, FISHES, FISH_COUNTER, MAX_HUNGER_DURATION, OWNER_TO_FISH};
 
 #[entry_point]
@@ -66,14 +66,19 @@ fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> St
     }
 
     if fish.dead {
-        return Err(StdError::generic_err("Your fish is dead 😢"));
+        return Err(StdError::generic_err("Your fish is dead"));
     }
 
     let hunger_duration = env.block.time.seconds() - fish.last_fed.seconds();
     if hunger_duration > MAX_HUNGER_DURATION {
         fish.dead = true;
         FISHES.insert(deps.storage, &fish_id, &fish)?;
-        return Err(StdError::generic_err("Your fish has died of hunger"));
+        return Ok(
+            Response::new()
+                .add_attribute("action", "feed_fish")
+                .add_attribute("status", "fish_died")
+                .add_attribute("reason", "hunger")
+        );
     }
 
     fish.last_fed = env.block.time;
@@ -91,6 +96,8 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             return fish_status(deps, env, sender_canonical);
         }
         QueryMsg::AllFish {} => return all_fish(deps, env),
+
+        QueryMsg::DeadFish {} => return dead_fish(deps, env)
     }
 }
 
@@ -128,18 +135,37 @@ fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary>
 fn all_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
     let fishes: Vec<ShortFishStatus> = FISHES
         .iter(deps.storage)?
-        .map(|item| {
-            let (id, fish) = item?;
-            Ok(ShortFishStatus {
+        .filter_map(|item| match item {
+            Ok((id, fish)) if !fish.dead => Some(Ok(ShortFishStatus {
                 id: id.into(),
                 name: fish.name,
                 dead: fish.dead,
                 colour: fish.colour,
-            })
+            })),
+            Ok(_) => None, // Dead fish, skip
+            Err(err) => Some(Err(err)), // Another error, bubble up
         })
         .collect::<StdResult<Vec<_>>>()?;
 
     Ok(to_binary(&QueryAnswer::AllFishStatus(fishes))?)
+}
+
+fn dead_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
+    let fishes: Vec<DeadFishStatus> = FISHES
+        .iter(deps.storage)?
+        .filter_map(|item| match item {
+            Ok((id, fish)) if !fish.dead => Some(Ok(DeadFishStatus {
+                id: id.into(),
+                name: fish.name,
+                colour: fish.colour,
+                owner: deps.api.addr_humanize(&fish.owner).unwrap().to_string()
+            })),
+            Ok(_) => None, // Dead fish, skip
+            Err(err) => Some(Err(err)), // Another error, bubble up
+        })
+        .collect::<StdResult<Vec<_>>>()?;
+
+    Ok(to_binary(&QueryAnswer::DeadFishStatus(fishes))?)
 }
 
 

@@ -11,18 +11,26 @@ type FullFishStatus = {
     name: string;
     age: number;
     seconds_since_fed: number;
-    dead: boolean;
     colour: number;
 };
 
 type ShortFishStatus = {
-    id: number,
-    name: string,
-    dead: boolean;
+    id: number;
+    name: string;
     colour: number;
+    dead: boolean;
 }
 
-type FishStatusResponse = FullFishStatus | string;
+type DeadFishStatus = {
+    id: number;
+    name: string;
+    colour: number;
+    owner: string;
+}
+
+type FullFishStatusResponse = FullFishStatus[] | string;
+type ShortFishStatusResponse = ShortFishStatus[] | string;
+type DeadFishStatusResponse = DeadFishStatus[] | string;
 
 const SecretJsFunctions = () => {
     const context = useContext(SecretJsContext);
@@ -54,7 +62,7 @@ const SecretJsFunctions = () => {
 
     const feed_fish = async (fish_id: number): Promise<TxResponse> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
-        
+
         // For some reason, if I don't do this, the contract converts it to a string and
         // complains its the wrong type. Man on bicycle with stick vibes
         let fish_id_number = parseInt(fish_id.toString())
@@ -75,7 +83,7 @@ const SecretJsFunctions = () => {
         return tx
     };
 
-    const query_my_fish = async (): Promise<FullFishStatus> => {
+    const query_my_fish = async (): Promise<FullFishStatusResponse> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
 
         const queryMsg = {
@@ -88,7 +96,7 @@ const SecretJsFunctions = () => {
             code_hash: contractCodeHash,
         };
 
-        const result = await secretJs.query.compute.queryContract(queryMsg) as FishStatusResponse;
+        const result = await secretJs.query.compute.queryContract(queryMsg) as FullFishStatusResponse;
 
         if (typeof result === "string") {
             throw new QueryError(result);
@@ -97,7 +105,7 @@ const SecretJsFunctions = () => {
         return result;
     };
 
-    const query_all_fish = async (): Promise<ShortFishStatus> => {
+    const query_all_fish = async (): Promise<ShortFishStatusResponse> => {
         if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
 
         const queryMsg = {
@@ -108,7 +116,7 @@ const SecretJsFunctions = () => {
             code_hash: contractCodeHash,
         };
 
-        const result = await secretJs.query.compute.queryContract(queryMsg) as FishStatusResponse;
+        const result = await secretJs.query.compute.queryContract(queryMsg) as ShortFishStatusResponse;
 
         if (typeof result === "string") {
             throw new QueryError(result);
@@ -119,13 +127,41 @@ const SecretJsFunctions = () => {
         return result;
     };
 
+    const query_dead_fish = async (): Promise<DeadFishStatusResponse> => {
+        if (!secretJs || !secretAddress) throw new WalletError("no wallet connected");
+
+        const queryMsg = {
+            contract_address: contractAddress,
+            query: {
+                dead_fish: {}
+            },
+            code_hash: contractCodeHash,
+        };
+
+        const result = await secretJs.query.compute.queryContract(queryMsg) as DeadFishStatusResponse;
+
+        if (typeof result === "string") {
+            throw new QueryError(result);
+        }
+
+        return result;
+    };
+
     return {
         adopt_fish,
         feed_fish,
         query_my_fish,
-        query_all_fish
+        query_all_fish,
+        query_dead_fish
     };
 };
 
 export { SecretJsFunctions };
-export type { ShortFishStatus, FullFishStatus, FishStatusResponse }
+export type {
+    ShortFishStatus,
+    FullFishStatus,
+    DeadFishStatus,
+    ShortFishStatusResponse,
+    FullFishStatusResponse,
+    DeadFishStatusResponse
+}
