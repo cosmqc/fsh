@@ -1,4 +1,4 @@
-# FSH - 
+# FSH - Fishies Swimmin Hungry
 
 Monorepo for secret auction example
 
@@ -8,9 +8,11 @@ Monorepo for secret auction example
 
 
 ## Setup
- - Follow the instructions in uploader/README.md
- - Once the contract is uploaded and instantiated, frontends can be run from anywhere:
- - `cd frontend`
- - `npm run install`
- - `npm run dev`
+ - Create `uploader/.env` and add your wallet mnemonic: `MNEMONIC="<mnemonic sentence>"`
+ - `chmod +x build_and_upload.sh`
+ - `./build_and_upload.sh`
+ - The above command will run a local frontend instance automatically, but frontends can be now run from anywhere:
+   - `cd frontend`
+   - `npm run install`
+   - `npm run dev`
  - Navigate to the address Vite gives you. Default is http://localhost:5173/
