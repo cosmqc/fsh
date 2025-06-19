@@ -124,18 +124,18 @@ const FishTamagotchiUI = () => {
     // Get fish status color based on hunger
     const getFishStatusColor = (fish: FullFishStatus) => {
         if (fish.dead) return '#303030';
-        if (fish.seconds_since_fed > 21600) return '#8B0000'; // 6 hours
-        if (fish.seconds_since_fed > 14400) return '#FF6B35'; // 4 hours
-        if (fish.seconds_since_fed > 7200) return '#FFD23F'; // 2 hours
+        if (fish.seconds_since_fed > 180) return '#8B0000'; // 3 minutes
+        if (fish.seconds_since_fed > 120) return '#FF6B35'; // 2 minutes
+        if (fish.seconds_since_fed > 60) return '#FFD23F'; // 1 minute
         return '#00CED1';
     };
 
     // Get fish status text based on hunger
     const getFishStatusText = (fish: FullFishStatus) => {
         if (fish.dead) return 'Dead';
-        if (fish.seconds_since_fed > 21600) return 'Dying'; // 6 hours
-        if (fish.seconds_since_fed > 14400) return 'Starving'; // 4 hours
-        if (fish.seconds_since_fed > 7200) return 'Hungry'; // 2 hours
+        if (fish.seconds_since_fed > 180) return 'Dying'; // 3 minutes
+        if (fish.seconds_since_fed > 120) return 'Starving'; // 2 minutes
+        if (fish.seconds_since_fed > 60) return 'Hungry'; // 1 minute
         return 'Swimming';
     };
 
@@ -230,7 +230,7 @@ const FishTamagotchiUI = () => {
                     margin: "0 0 25px 0",
                     fontSize: "26px",
                     color: "#FFFFFF",
-                    textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                    textShadow: "2px 2px 4px rgba(0,0,0,0.1)",
                     fontWeight: "300",
                     letterSpacing: "1px",
                     textAlign: "center"
