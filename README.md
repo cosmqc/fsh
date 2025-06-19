@@ -1,4 +1,4 @@
-# FSH - 
+# FSH - Fishies Swimmin Hungry
 
 Monorepo for secret auction example
 
