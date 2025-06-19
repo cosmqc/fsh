@@ -12,13 +12,13 @@ type FullFishStatus = {
     age: number;
     seconds_since_fed: number;
     colour: number;
+    dead: boolean;
 };
 
 type ShortFishStatus = {
     id: number;
     name: string;
     colour: number;
-    dead: boolean;
 }
 
 type DeadFishStatus = {

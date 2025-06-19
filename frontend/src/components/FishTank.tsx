@@ -18,7 +18,7 @@ const waveAnimation = keyframes`
 
 const Container = styled.div`
   position: fixed;
-  z-index: -1;
+  z-index: 0;
   top: 0;
   left: 0;
   right: 0;
@@ -81,7 +81,7 @@ const SandTexture = styled.div`
     radial-gradient(circle at 40% 40%, rgba(200, 180, 140, 0.2) 1px, transparent 1px),
     radial-gradient(circle at 60% 70%, rgba(170, 150, 110, 0.2) 1px, transparent 1px);
   background-size: 15px 15px, 20px 20px, 10px 10px, 25px 25px;
-  z-index: 2;
+  z-index: 1;
 `
 
 type FishTankProps = {

@@ -86,6 +86,7 @@ const FishTamagotchiUI = () => {
                     display: "flex",
                     flexDirection: "column",
                     backdropFilter: "blur(10px)",
+                    zIndex: 2,
                 }}
             >
                 <h2 style={{

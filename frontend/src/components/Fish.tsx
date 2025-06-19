@@ -110,14 +110,12 @@ const Fish: React.FC<FishProps> = ({
 
   return (
     <FishContainer
-      //@ts-ignore
       $startPosition={startY}
+      onMouseEnter={() => console.log(fishStatus)}
     >
       <PixelFish
         src='/fish.png'
-        // @ts-ignore
         $reverse={$reverse}
-        // @ts-ignore
         $size={size}
         $colour={fishStatus.colour}
         $x={x}

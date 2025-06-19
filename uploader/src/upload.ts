@@ -28,7 +28,6 @@ const uploadContract = async (contract_wasm: Buffer): Promise<{code_id: string, 
         }
     );
 
-    //@ts-ignore
     const codeId = tx.arrayLog!.find((log) => log.type === "message" && log.key === "code_id").value;
   
     console.log("Code Id: ", codeId);
