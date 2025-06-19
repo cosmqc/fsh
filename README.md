@@ -12,7 +12,7 @@ Monorepo for secret auction example
  - `chmod +x build_and_upload.sh`
  - `./build_and_upload.sh`
  - The above command will run a local frontend instance automatically, but frontends can be now run from anywhere:
- - `cd frontend`
- - `npm run install`
- - `npm run dev`
+   - `cd frontend`
+   - `npm run install`
+   - `npm run dev`
  - Navigate to the address Vite gives you. Default is http://localhost:5173/
