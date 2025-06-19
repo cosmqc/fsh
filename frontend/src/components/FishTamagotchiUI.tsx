@@ -61,6 +61,7 @@ const FishTamagotchiUI = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [hoveredFishId, setHoveredFishId] = useState<number | null>(null);
     const hoveredRef = useRef(hoveredFishId)
+    
     useEffect(() => {
         hoveredRef.current = hoveredFishId
     }, [hoveredFishId])
@@ -68,9 +69,17 @@ const FishTamagotchiUI = () => {
     const [adoptFishField, setAdoptFishField] = useState("");
     const [tick, setTick] = useState(0)
 
+    const handleWalletConnection = async () => {
+        try {
+            await connectWallet();
+        } catch (error: any) {
+            showError(error.message)
+        }
+        
+    }
     // Connect to the wallet on load
     useEffect(() => {
-        connectWallet();
+        handleWalletConnection()
     }, []);
 
     // Show 'connection success' animation when address changes
@@ -158,7 +167,7 @@ const FishTamagotchiUI = () => {
         <div style={{ fontFamily: "sans-serif", display: "flex", width: "100vw", minHeight: "100vh", position: "relative" }}>
             {/* Floating Wallet Button */}
             <button
-                onClick={connectWallet}
+                onClick={handleWalletConnection}
                 style={{
                     position: "fixed",
                     top: "20px",

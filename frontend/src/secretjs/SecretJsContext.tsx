@@ -10,6 +10,7 @@ import type {
 } from "react";
 import { SecretNetworkClient } from "secretjs";
 import { sleep } from "../utils/sleep"
+import { WalletError } from "./SecretJsError";
 
 // can make these .env vars instead
 const SECRET_CHAIN_ID = import.meta.env.VITE_SECRET_CHAIN_ID;
@@ -84,18 +85,16 @@ const SecretJsContextProvider: FC<SecretJsContextProviderProps> = ({ children })
     }
 
     async function connectWallet(): Promise<void> {
+
+        if (!window.keplr) {
+            throw new WalletError("Install Keplr!")
+        }
         try {
-            if (!window.keplr) {
-                console.log("install keplr!");
-            } else {
-                await setupKeplr(setSecretJs, setSecretAddress);
-                localStorage.setItem("keplrAutoConnect", "true");
-                console.log(secretAddress);
-            }
+            await setupKeplr(setSecretJs, setSecretAddress);
+            localStorage.setItem("keplrAutoConnect", "true");
         } catch (error) {
-            alert(
-                "An error occurred while connecting to the wallet. Please try again."
-            );
+            console.error(error)
+            throw new WalletError("An error occurred while connecting to the wallet. Please try again.")
         }
     }
 
