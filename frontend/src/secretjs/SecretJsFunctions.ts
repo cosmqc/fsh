@@ -121,9 +121,7 @@ const SecretJsFunctions = () => {
         if (typeof result === "string") {
             throw new QueryError(result);
         }
-
-
-
+        
         return result;
     };
 

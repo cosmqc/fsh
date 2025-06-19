@@ -6,6 +6,9 @@ use cosmwasm_std::{
 use crate::msg::{ExecuteMsg, ShortFishStatus, FullFishStatus, InstantiateMsg, QueryAnswer, QueryMsg, DeadFishStatus};
 use crate::state::{Fish, FISHES, FISH_COUNTER, MAX_HUNGER_DURATION, OWNER_TO_FISH};
 
+/**
+ * Instantiate a contract. Starts a counter so fish have unique IDs.
+ */
 #[entry_point]
 pub fn instantiate(
     deps: DepsMut,
@@ -26,14 +29,28 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
     }
 }
 
+/**
+ * Adopt a fish. A user can have up to 5 alive fish at a time.
+ * Fish are named with user input and are given a random colour.
+ */
 fn adopt_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, name: String) -> StdResult<Response> {
     let mut fish_ids = OWNER_TO_FISH.get(deps.storage, &sender).unwrap_or_default();
+    let num_alive_fish = fish_ids.iter()
+        .filter(|fish_id| {
+            if let Some(fish) = FISHES.get(deps.storage, fish_id) {
+                !fish.dead
+            } else {
+                false
+            }
+        })
+        .count();
 
-    if fish_ids.len() >= 5 {
-        return Err(StdError::generic_err("You have too many fish!"));
+    if num_alive_fish >= 5 {
+        return Err(StdError::generic_err("You have too many alive fish to adopt more!"));
     }
 
-    let colour = random_colour(&env).unwrap_or(0);
+    // If we can't get a colour, just default to no hue shift
+    let colour = random_colour(&env).unwrap_or_default();
     let fish_id = FISH_COUNTER.load(deps.storage)?;
     FISH_COUNTER.save(deps.storage, &(&fish_id + 1))?;
 
@@ -54,7 +71,11 @@ fn adopt_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, name: String) -> S
     Ok(Response::new().add_attribute("action", "adopt_fish"))
 }
 
-
+/**
+ * Feed your fish. If a fish is fed after the MAX_HUNGER_DURATION, they die.
+ * This have to be done after the fact (and not right as they get too hungry)
+ * as queries can't update the storage.
+ */
 fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> StdResult<Response> {
     let mut fish = match FISHES.get(deps.storage, &fish_id) {
         Some(f) => f,
@@ -69,10 +90,13 @@ fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> St
         return Err(StdError::generic_err("Your fish is dead"));
     }
 
+    // If the fish has been hungry for too long
     let hunger_duration = env.block.time.seconds() - fish.last_fed.seconds();
     if hunger_duration > MAX_HUNGER_DURATION {
         fish.dead = true;
         FISHES.insert(deps.storage, &fish_id, &fish)?;
+
+        // Must be Ok instead of Err, otherwise the storage insert gets rolled back
         return Ok(
             Response::new()
                 .add_attribute("action", "feed_fish")
@@ -81,6 +105,7 @@ fn feed_fish(deps: DepsMut, env: Env, sender: CanonicalAddr, fish_id: u64) -> St
         );
     }
 
+    // If all good, feed the fish and update the storage
     fish.last_fed = env.block.time;
     FISHES.insert(deps.storage, &fish_id, &fish)?;
 
@@ -96,22 +121,26 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             return fish_status(deps, env, sender_canonical);
         }
         QueryMsg::AllFish {} => return all_fish(deps, env),
-
         QueryMsg::DeadFish {} => return dead_fish(deps, env)
     }
 }
 
-
+/**
+ * Returns a list of the sender's fish, including dead ones.
+ * Gives the most information out of the queries.
+ */
 fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary> {
+    // Get the IDs of all the fish the owner has
     let fish_ids = OWNER_TO_FISH
         .get(deps.storage, &sender)
         .unwrap_or_default();
 
     let now = env.block.time.seconds();
-
     let mut statuses = Vec::new();
 
+    // Iterate over them
     for fish_id in fish_ids {
+        // Get the fish from the fish ID
         let fish = FISHES
             .get(deps.storage, &fish_id).unwrap();
 
@@ -131,15 +160,18 @@ fn fish_status(deps: Deps, env: Env, sender: CanonicalAddr) -> StdResult<Binary>
     Ok(to_binary(&QueryAnswer::MyFishStatus(statuses))?)
 }
 
-
+/**
+ * Returns a list of all alive fish in the tank.
+ * Gives minimal information (as it's only used for the fish swimming around)
+ */
 fn all_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
-    let fishes: Vec<ShortFishStatus> = FISHES
+    // filter the fish so we only have the alive ones
+    let alive_fishes: Vec<ShortFishStatus> = FISHES
         .iter(deps.storage)?
         .filter_map(|item| match item {
             Ok((id, fish)) if !fish.dead => Some(Ok(ShortFishStatus {
                 id: id.into(),
                 name: fish.name,
-                dead: fish.dead,
                 colour: fish.colour,
             })),
             Ok(_) => None, // Dead fish, skip
@@ -147,28 +179,35 @@ fn all_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
         })
         .collect::<StdResult<Vec<_>>>()?;
 
-    Ok(to_binary(&QueryAnswer::AllFishStatus(fishes))?)
+    Ok(to_binary(&QueryAnswer::AllFishStatus(alive_fishes))?)
 }
 
+/**
+ * Returns a list of all dead fish in the tank.
+ * Gives the same fish information as all_fish, except the owner is also given.
+ */
 fn dead_fish(deps: Deps, _env: Env) -> StdResult<Binary> {
-    let fishes: Vec<DeadFishStatus> = FISHES
+    // filter the fish so we only have the dead ones
+    let dead_fishes: Vec<DeadFishStatus> = FISHES
         .iter(deps.storage)?
         .filter_map(|item| match item {
-            Ok((id, fish)) if !fish.dead => Some(Ok(DeadFishStatus {
+            Ok((id, fish)) if fish.dead => Some(Ok(DeadFishStatus {
                 id: id.into(),
                 name: fish.name,
                 colour: fish.colour,
                 owner: deps.api.addr_humanize(&fish.owner).unwrap().to_string()
             })),
-            Ok(_) => None, // Dead fish, skip
-            Err(err) => Some(Err(err)), // Another error, bubble up
+            Ok(_) => None, // Alive fish
+            Err(err) => Some(Err(err)), // An error, bubble up
         })
         .collect::<StdResult<Vec<_>>>()?;
 
-    Ok(to_binary(&QueryAnswer::DeadFishStatus(fishes))?)
+    Ok(to_binary(&QueryAnswer::DeadFishStatus(dead_fishes))?)
 }
 
-
+/**
+ * Returns a colour based on on-chain randomness.
+ */
 fn random_colour(env: &Env) -> StdResult<u16> {
     let randomness = env
         .block

@@ -51,6 +51,7 @@ const Container = styled.div`
     animation: ${waveAnimation} 8s ease-in-out infinite;
     opacity: 0.6;
     z-index: 1;
+    pointer-events: none;
   }
 
   /* second layer of waves */
@@ -66,6 +67,7 @@ const Container = styled.div`
     animation: ${waveAnimation} 5s ease-in-out infinite reverse;
     opacity: 0.3;
     z-index: 1;
+    pointer-events: none;
   }
 `
 
@@ -82,14 +84,16 @@ const SandTexture = styled.div`
     radial-gradient(circle at 60% 70%, rgba(170, 150, 110, 0.2) 1px, transparent 1px);
   background-size: 15px 15px, 20px 20px, 10px 10px, 25px 25px;
   z-index: 1;
+  pointer-events: none;
 `
 
 type FishTankProps = {
   allFish: ShortFishStatus[];
+  hoveredFishId: number | null;
 };
 
-const FishTank = ({ allFish }: FishTankProps) => {
-  const { fishElements, showFish, fishInTank, setFishInTank } = useFish()
+const FishTank = ({ allFish, hoveredFishId }: FishTankProps) => {
+  const { fishElements, showFish, fishInTank, setFishInTank, setHoveredFishId } = useFish()
   const [tick, setTick] = useState(0)
 
   const updateTick = async () => {
@@ -97,6 +101,12 @@ const FishTank = ({ allFish }: FishTankProps) => {
     setTick((tick + 1) % 3)
   }
 
+  // Pass the fish getting hovered on in the side menu down to the fish context
+  useEffect(() => {
+    setHoveredFishId(hoveredFishId)
+  }, [hoveredFishId])
+
+  // Fish spawning
   useEffect(() => {
     updateTick()
 

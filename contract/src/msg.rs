@@ -7,6 +7,14 @@ pub struct InstantiateMsg {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+pub enum QueryMsg {
+    FishStatus { address: Addr },
+    AllFish {},
+    DeadFish {}
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     AdoptFish { name: String },
     FeedFish { fish_id: u64 },
@@ -14,10 +22,10 @@ pub enum ExecuteMsg {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-pub enum QueryMsg {
-    FishStatus { address: Addr },
-    AllFish {},
-    DeadFish {}
+pub enum QueryAnswer {
+    MyFishStatus(Vec<FullFishStatus>),
+    AllFishStatus(Vec<ShortFishStatus>),
+    DeadFishStatus(Vec<DeadFishStatus>)
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -34,7 +42,6 @@ pub struct FullFishStatus {
 pub struct ShortFishStatus {
     pub id: Uint64,
     pub name: String,
-    pub dead: bool,
     pub colour: u16
 }
 
@@ -44,13 +51,5 @@ pub struct DeadFishStatus {
     pub name: String,
     pub colour: u16,
     pub owner: String
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum QueryAnswer {
-    MyFishStatus(Vec<FullFishStatus>),
-    AllFishStatus(Vec<ShortFishStatus>),
-    DeadFishStatus(Vec<DeadFishStatus>)
 }
 
