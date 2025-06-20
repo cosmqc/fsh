@@ -388,7 +388,7 @@ const FishTamagotchiUI = () => {
                 </div>
 
                 {/* Adopt Fish Section */}
-                {(myFish == null || myFish.filter((fish) => !fish.dead).length < 10) && (
+                {(myFish == null || myFish.filter((fish) => !fish.dead).length < 5) && (
                     <div style={{
                         backgroundColor: "rgba(255,255,255,0.1)",
                         border: "1px solid rgba(255,255,255,0.2)",
