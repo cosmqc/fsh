@@ -14,10 +14,9 @@
     "start": "node dist/src/index",
     "start:dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "pretest": "npm run build",
-    "test": "mocha dist/test/**/*.js",
-    "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",
-    "upload": "node dist/src/upload",
-    "instantiate": "node dist/src/instantiate_only"
+    "upload": "node dist/upload",
+    "instantiate": "node dist/instantiate_only",
+    "test": "node dist/instantiate_and_test"
   },
   "devDependencies": {
     "@protobuf-ts/plugin": "^2.10.0",

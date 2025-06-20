@@ -46,7 +46,6 @@ cd "$PROJECT_ROOT/uploader"
 
 # Capture the upload output
 UPLOAD_OUTPUT=$(npm run upload 2>&1)
-echo "$UPLOAD_OUTPUT"
 
 # Extract Code Id and Contract hash from the output
 CODE_ID=$(echo "$UPLOAD_OUTPUT" | grep "Code Id:" | awk '{print $3}')
@@ -59,12 +58,11 @@ if [ -z "$CODE_ID" ] || [ -z "$CONTRACT_HASH" ]; then
     exit 1
 fi
 
-print_status "Upload completed - Code Id: $CODE_ID, Contract Hash: $CONTRACT_HASH"
+print_status "Upload completed"
 
 # Step 3: Instantiate the contract
 print_status "Instantiating contract..."
 INSTANTIATE_OUTPUT=$(npm run instantiate $CODE_ID $CONTRACT_HASH 2>&1)
-echo "$INSTANTIATE_OUTPUT"
 
 # Extract Contract address from the output
 CONTRACT_ADDRESS=$(echo "$INSTANTIATE_OUTPUT" | grep "Contract address:" | awk '{print $3}')
@@ -76,19 +74,30 @@ if [ -z "$CONTRACT_ADDRESS" ]; then
     exit 1
 fi
 
-print_status "Instantiation completed - Contract Address: $CONTRACT_ADDRESS"
+print_status "Instantiation completed"
 
 # Step 4: Update the .env file
 print_status "Updating .env file..."
 ENV_FILE="$PROJECT_ROOT/frontend/.env"
+ENV_EXAMPLE="$PROJECT_ROOT/frontend/.env.example"
 
+WAS_ERROR=0
 # Update or create .env file
 {
-    # If .env exists, preserve other variables
+    # If .env exists, overwrite past variables
     if [ -f "$ENV_FILE" ]; then
-        # Remove existing CONTRACT_HASH and CONTRACT_ADDRESS lines
         grep -v "^VITE_CONTRACT_CODE_HASH=" "$ENV_FILE" | grep -v "^VITE_CONTRACT_ADDR=" || true
+    
+    # If .env doesn't exist, copy example file and overwrite nonce values
+    elif [ -f "$ENV_EXAMPLE" ]; then
+        grep -v "^VITE_CONTRACT_CODE_HASH=" "$ENV_EXAMPLE" | grep -v "^VITE_CONTRACT_ADDR=" || true
+
+
+    # If example file doesn
+    else
+        WAS_ERROR=1
     fi
+
     # Add new values
     echo "VITE_CONTRACT_CODE_HASH=$CONTRACT_HASH"
     echo "VITE_CONTRACT_ADDR=$CONTRACT_ADDRESS"
@@ -96,21 +105,21 @@ ENV_FILE="$PROJECT_ROOT/frontend/.env"
 
 mv "$ENV_FILE.tmp" "$ENV_FILE"
 
-print_status ".env file updated successfully"
-
-# Step 5: Display summary
-print_status "Deployment completed successfully!"
-echo ""
-echo "======================================"
-echo "         DEPLOYMENT SUMMARY"
-echo "======================================"
-echo "Code Id:          $CODE_ID"
-echo "Contract Hash:    $CONTRACT_HASH"
-echo "Contract Address: $CONTRACT_ADDRESS"
-echo "======================================"
-echo ""
-
-print_status "Environment file updated at: $ENV_FILE"
-print_status "Starting frontend..."
-cd "$PROJECT_ROOT/frontend"
-npm run dev
+if [ $WAS_ERROR ]; then
+    print_warning ".env and .env.example not found, you'll have to create your file manually. Check the docs :)"
+    echo ""
+    echo "======================================"
+    echo "         DEPLOYMENT SUMMARY"
+    echo "======================================"
+    echo "Code Id:          $CODE_ID"
+    echo "Contract Hash:    $CONTRACT_HASH"
+    echo "Contract Address: $CONTRACT_ADDRESS"
+    echo "======================================"
+    echo ""
+else
+    print_status "Environment file successfully updated at: $ENV_FILE"
+    print_status "Deployment completed successfully!"
+    print_status "Starting frontend..."
+    cd "$PROJECT_ROOT/frontend"
+    npm run dev
+fi

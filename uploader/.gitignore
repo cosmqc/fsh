@@ -134,3 +134,4 @@ dist
 # Build distribution directory
 dist/
 
+.vscode/
