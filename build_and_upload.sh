@@ -81,7 +81,7 @@ print_status "Updating .env file..."
 ENV_FILE="$PROJECT_ROOT/frontend/.env"
 ENV_EXAMPLE="$PROJECT_ROOT/frontend/.env.example"
 
-WAS_ERROR=0
+WAS_ERROR=false
 # Update or create .env file
 {
     # If .env exists, overwrite past variables
@@ -92,10 +92,9 @@ WAS_ERROR=0
     elif [ -f "$ENV_EXAMPLE" ]; then
         grep -v "^VITE_CONTRACT_CODE_HASH=" "$ENV_EXAMPLE" | grep -v "^VITE_CONTRACT_ADDR=" || true
 
-
-    # If example file doesn
+    # If example file doesn't exist
     else
-        WAS_ERROR=1
+        WAS_ERROR=true
     fi
 
     # Add new values
@@ -103,9 +102,8 @@ WAS_ERROR=0
     echo "VITE_CONTRACT_ADDR=$CONTRACT_ADDRESS"
 } > "$ENV_FILE.tmp"
 
-mv "$ENV_FILE.tmp" "$ENV_FILE"
-
-if [ $WAS_ERROR ]; then
+if $WAS_ERROR; then
+    rm "$ENV_FILE.tmp"
     print_warning ".env and .env.example not found, you'll have to create your file manually. Check the docs :)"
     echo ""
     echo "======================================"
@@ -117,6 +115,7 @@ if [ $WAS_ERROR ]; then
     echo "======================================"
     echo ""
 else
+    mv "$ENV_FILE.tmp" "$ENV_FILE"
     print_status "Environment file successfully updated at: $ENV_FILE"
     print_status "Deployment completed successfully!"
     print_status "Starting frontend..."

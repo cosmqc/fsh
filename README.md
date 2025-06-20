@@ -6,7 +6,6 @@ Monorepo for secret auction example
 - `uploader/` contains scripts to upload the contract and test it
 - `frontend/` contains a React app for interacting with the auction contract
 
-
 ## Setup
  - Create `uploader/.env` and add your wallet mnemonic: `MNEMONIC="<mnemonic sentence>"`
  - `chmod +x build_and_upload.sh`

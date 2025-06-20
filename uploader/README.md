@@ -1,6 +1,6 @@
 # Uploader scripts for the secret auction example
 
-## Building
+## Building the scripts
 
 `npm install`
 
@@ -16,10 +16,16 @@ Run:
 
 `npm run upload`
 
-Record the resulting Code id and Contract hash.
+Record the resulting Code ID and Contract hash.
 
 ## Instantiating the contract
 
-`npm run instantiate {Code id} {Contract hash}`
+`npm run instantiate {Code ID} {Contract hash}`
 
 Record the resulting Contract address. This can be used, along with the code hash, in the frontend react application (add to `.env` there).
+
+## Integration test
+The contract runs through a simple integration test by using the following command:
+`npm run test {Code ID} {Contract hash}`
+
+It's not very quick as each query/execute takes ~6 seconds, and there's a set of tests that need a fish to be dead as a precondition (~3 minutes).
