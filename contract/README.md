@@ -1,4 +1,4 @@
-# Secret Auction
+# FSH Smart Contract
 
 Smart contract for the FSH blockchain fish tank.
 

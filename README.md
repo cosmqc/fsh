@@ -1,10 +1,10 @@
 # FSH - Fishies Swimmin Hungry
 
-Monorepo for secret auction example
+Monorepo for the FSH blockchain fish tank 
 
 - `contract/` contains the smart contract code
 - `uploader/` contains scripts to upload the contract and test it
-- `frontend/` contains a React app for interacting with the auction contract
+- `frontend/` contains a React app for interacting with the smart contract
 
 ## Setup
  - Create `uploader/.env` and add your wallet mnemonic: `MNEMONIC="<mnemonic sentence>"`

@@ -1,4 +1,6 @@
-# Uploader scripts for the secret auction example
+# FSH Uploader
+
+Uploader scripts for the FSH blockchain fish tank
 
 ## Building the scripts
 
